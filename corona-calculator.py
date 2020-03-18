@@ -266,8 +266,18 @@ def run_app():
         f"not take into account any special measures that may have been taken in the last few months."
     )
 
-    df = preprocessing.process_mortality_by_demographics()
-    fig = graphing.age_segregated_hospitalization_and_mortality(df)
+    st.subheader("How many people will die?")
+
+    num_dead = df[df.Status == "Dead"].Forecast.iloc[-1]
+    # Total infected is dead + recovered
+    num_infected = df[df.Status == "Recovered"].Forecast.iloc[-1] + num_dead
+    st.markdown(
+        f"If the average person in your country adopts the defined behavior, **{int(num_dead):,}** "
+        f"people will die. The graph below shows a breakdown of casualties by age group."
+    )
+
+    outcomes_by_age_group = models.get_deaths_by_age_group(num_dead, num_infected)
+    fig = graphing.age_segregated_mortality(outcomes_by_age_group, population)
     st.write(fig)
 
 
